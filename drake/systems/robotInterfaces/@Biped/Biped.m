@@ -36,25 +36,29 @@ classdef Biped < LeggedRobot
   end
 
   methods
-    function obj = Biped(r_foot_frame_id_or_name, l_foot_frame_id_or_name)
+    function obj = Biped(r_foot_frame_id_or_name, l_foot_frame_id_or_name, r_toe_frame_id_or_name, l_toe_frame_id_or_name)
       % Construct a biped by identifying the Drake frame's corresponding
       % to the soles of its feet.
       if nargin < 1
         % use atlas defaults
         r_foot_frame_id_or_name = 'r_foot_sole';
         l_foot_frame_id_or_name = 'l_foot_sole';
+      elseif nargin < 3
+        r_toe_frame_id_or_name = 'r_foot_toe';
+        l_toe_frame_id_or_name = 'l_foot_toe'; 
       end
 
       obj = obj@LeggedRobot();
 
       r_frame_id = obj.parseBodyOrFrameID(r_foot_frame_id_or_name);
+      disp(r_frame_id)
       r_body_id = obj.getFrame(r_frame_id).body_ind;
       l_frame_id = obj.parseBodyOrFrameID(l_foot_frame_id_or_name);
       l_body_id = obj.getFrame(l_frame_id).body_ind;
       obj.foot_body_id = struct('left', l_body_id, 'right', r_body_id);
       obj.foot_frame_id = struct('left', l_frame_id, 'right', r_frame_id);
-      obj.toe_frame_id = struct('left', obj.parseBodyOrFrameID('l_foot_toe'),...
-                                'right', obj.parseBodyOrFrameID('r_foot_toe'));
+      obj.toe_frame_id = struct('left', obj.parseBodyOrFrameID(l_toe_frame_id_or_name),...
+                                'right', obj.parseBodyOrFrameID(r_toe_frame_id_or_name));
     end
 
     function [A, b] = getReachabilityPolytope(obj, stance_foot_frame, swing_foot_frame, params)
