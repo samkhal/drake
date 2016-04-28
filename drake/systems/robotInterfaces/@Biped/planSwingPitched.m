@@ -82,6 +82,7 @@ toe2 = tform2poseQuat(T_swing2_frame_to_world/T_frame_to_foot * T_toe_to_foot);
 quat_toe_off = rotmat2quat(T_swing1_frame_to_world(1:3,1:3) * rpy2rotmat([0;toe_off_angle;0]));
 quat_swing2 = rotmat2quat(T_swing2_frame_to_world(1:3,1:3));
 
+%!!! q_latest isn't defined so debug is pointless
 if DEBUG
   v = biped.constructVisualizer();
   v.draw(0, q_latest);
