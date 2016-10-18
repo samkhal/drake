@@ -1,4 +1,4 @@
-function xtraj = runPlanning(q0, pos_final, options)
+function xtraj = runPlanning_fix(q0, pos_final, options)
 % default starting pose
 if nargin<1
   q0 = [0,0,0,0,0,0]';
@@ -29,9 +29,7 @@ end
 
 gripper_idx = findLinkId(r,'link_6');
 gripper_pt = [-0.04,0,0.1]';
-%grasp_orient = angle2quat(-1.3,1.1,0.8)';
-q=quaternion.eulerangles('zyz',-1.3,1.1,0.8);
-grasp_orient = q.e;
+
 grasp_orient = [0.5019 -0.6372 0.1823 0.5556]';
 
 T = 1;
@@ -49,9 +47,7 @@ Allcons{end+1} = r_gripper_cons_orient;
 % compute seeds
 q_start_nom = q0;
 
-% [q_end_nom,snopt_info_ik,infeasible_constraint_ik] = inverseKin(r,q_start_nom,q_start_nom,...
-%   Allcons{:});
-% qtraj_guess = PPTrajectory(foh([0 T],[q_start_nom, q_end_nom]));
+
 ikproblem = InverseKinematics(r,q_start_nom,...
   Allcons{:});
 [q_end_nom,F,info,infeasible_cnstr_ik] = ikproblem.solve(q_start_nom);
@@ -60,9 +56,7 @@ qtraj_guess = PPTrajectory(foh([0 T],[q_start_nom, q_end_nom]));
 t_vec = linspace(0,T,N);
 
 % do IK
-% [xtraj,snopt_info,infeasible_constraint] = inverseKinTraj(r,...
-%   t_vec,qtraj_guess,qtraj_guess,...
-%   Allcons{:});
+
 ikproblem = InverseKinematicsTrajectory(r,...
   t_vec,qtraj_guess,false,q_start_nom,...
   Allcons{:});
@@ -70,12 +64,12 @@ ikproblem = InverseKinematicsTrajectory(r,...
 
 q_end = xtraj.eval(xtraj.tspan(end));
 % do visualize
-%if options.visualize && snopt_info <= 10
+
 if options.visualize && info <= 10
   v.playback(xtraj,struct('slider',true));
 end
 
-%if snopt_info > 10
+
 if info > 10
   error('IK fail snopt_info: %d\n', snopt_info);
 end

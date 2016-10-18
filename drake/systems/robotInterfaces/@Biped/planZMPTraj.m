@@ -23,6 +23,8 @@ is_right_foot = footsteps(1).frame_id == biped.foot_frame_id.right;
 
 kinsol = doKinematics(biped, q0);
 com0 = biped.getCOM(kinsol);
+
+% Convert footstepPlan to all quaternions
 foot0 = struct('right', forwardKin(biped, kinsol, biped.foot_frame_id.right, [0;0;0], 2),...
                'left', forwardKin(biped, kinsol, biped.foot_frame_id.left, [0;0;0], 2));
 
@@ -161,6 +163,7 @@ function [zmp, supp] = getZMPBetweenFeet(biped, steps)
       supp_groups = steps.(foot).walking_params.support_contact_groups;
       supp_pts = biped.getTerrainContactPoints(biped.foot_body_id.(foot), {supp_groups});
       initial_support_groups{end+1} = supp_groups;
+      %T_sole_to_world is sole in world frame (T_world^sole)
       T_sole_to_world = poseQuat2tform(steps.(foot).pos);
       T_sole_to_foot = biped.getFrame(steps.(foot).frame_id).T;
       T_foot_to_world = T_sole_to_world / T_sole_to_foot;
@@ -190,6 +193,7 @@ function [rstep, lstep] = getSafeInitialSupports(biped, kinsol, steps, options)
     supp_groups = steps.(foot).walking_params.support_contact_groups;
     supp_pts = biped.getTerrainContactPoints(biped.foot_body_id.(foot), {supp_groups});
     supp_pts = supp_pts.pts;
+    % Shift all support points towards their mean by the shrink factor
     supp_pts = bsxfun(@plus, mean(supp_pts, 2), options.support_shrink_factor * bsxfun(@minus, supp_pts, mean(supp_pts, 2)));
     supp_pts_in_world = biped.forwardKin(kinsol, biped.foot_body_id.(foot), supp_pts, 0);
     all_supp_pts_in_world = [all_supp_pts_in_world, supp_pts_in_world(1:3,:)];

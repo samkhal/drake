@@ -36,8 +36,10 @@ R=rotz(walking_options.navgoal(6));
 rfoot_navgoal = walking_options.navgoal;
 lfoot_navgoal = walking_options.navgoal;
 
-rfoot_navgoal(1:3) = rfoot_navgoal(1:3) + R*[0;-0.13;0];
-lfoot_navgoal(1:3) = lfoot_navgoal(1:3) + R*[0;0.13;0];
+half_step_width = walking_options.nom_step_width/2;
+rfoot_navgoal(1:3) = rfoot_navgoal(1:3) + R*[0;-half_step_width;0];
+lfoot_navgoal(1:3) = lfoot_navgoal(1:3) + R*[0;half_step_width;0];
+
 
 % Plan footsteps to the goal
 goal_pos = struct('right', rfoot_navgoal, 'left', lfoot_navgoal);
