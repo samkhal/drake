@@ -36,10 +36,6 @@ struct PositionIndices {
   std::map<Side, std::vector<int>> legs;
   std::map<Side, int> knees;
   std::map<Side, std::vector<int>> ankles;
-  std::map<Side, std::vector<int>> arms;
-  std::vector<int> neck;
-  int back_bkz;
-  int back_bky;
 };
 
 struct RobotPropertyCache {
