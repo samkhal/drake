@@ -1,6 +1,7 @@
 *.idea
 *.autosave
 *.mex*
+!drake/matlab/solvers/NonlinearProgramSnoptmex.mexa64
 *.exp
 *.pdb
 *.lib
