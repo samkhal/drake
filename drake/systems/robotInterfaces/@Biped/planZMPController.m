@@ -23,6 +23,7 @@ else
   zmp_opts.comdot0 = comdot(1:2);
 end
 
+% Get foot pose in world
 foot_pos = [forwardKin(obj, kinsol, obj.foot_frame_id.right, zeros(3, 1)), forwardKin(obj, kinsol, obj.foot_frame_id.left, zeros(3, 1))];
 zfeet = mean(foot_pos(3,:));
 

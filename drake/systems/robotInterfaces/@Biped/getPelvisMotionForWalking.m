@@ -89,6 +89,7 @@ if options.debug
   lcmgl.switchBuffers();
 end
 
+% assign rfoot_body_motion and lfoot_body_motion appropriately
 for j = 1:length(foot_motion_data)
   body_id = foot_motion_data(j).body_id;
   if body_id < 0

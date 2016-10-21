@@ -3,14 +3,14 @@ function [zmp_knots, body_motions] = planZMPTraj(biped, q0, footsteps, options)
 % @param q0 the initial configuration vector
 % @param footsteps a list of Footstep objects
 % @option t0 the initial time offset of the trajectories to be generated (default: 0)
-% @option first_step_hold_s the number of seconds to wait before lifting the first foot (default: 1)
+% @option first_last_step_hold_s the number of seconds to wait before lifting the first foot an after placing final foot
 
 MAX_FINAL_SWING_SPEED = 1.0;
 
 if nargin < 4; options = struct(); end
 
 options = applyDefaults(options, struct('t0', 0,...
-                                        'first_step_hold_s', 1.5));
+                                        'first_last_step_hold_s', 1.5));
 
 target_frame_id = struct('right', biped.toe_frame_id.right,...
                          'left', biped.toe_frame_id.left);
@@ -24,7 +24,7 @@ is_right_foot = footsteps(1).frame_id == biped.foot_frame_id.right;
 kinsol = doKinematics(biped, q0);
 com0 = biped.getCOM(kinsol);
 
-% Convert footstepPlan to all quaternions
+%------------ Convert footstepPlan to all quaternions
 foot0 = struct('right', forwardKin(biped, kinsol, biped.foot_frame_id.right, [0;0;0], 2),...
                'left', forwardKin(biped, kinsol, biped.foot_frame_id.left, [0;0;0], 2));
 
@@ -48,10 +48,12 @@ end
 steps.right = footsteps_with_quat([footsteps_with_quat.frame_id] == biped.foot_frame_id.right);
 steps.left = footsteps_with_quat([footsteps_with_quat.frame_id] == biped.foot_frame_id.left);
 
+%------Calc initial foot placements
+
 [steps.right(1), steps.left(1)] = getSafeInitialSupports(biped, kinsol, struct('right', steps.right(1), 'left', steps.left(1)));
 [~, supp0] = getZMPBetweenFeet(biped, struct('right', steps.right(1), 'left', steps.left(1)));
 
-% start zmp at current COM position
+% start zmp at current COM xy position
 zmp0 = com0(1:2);
 
 zmp_knots = struct('t', options.t0, 'zmp', zmp0, 'supp', supp0);
@@ -75,6 +77,7 @@ for f = {'right', 'left'}
   frame_knots.(foot) = [Tframe(1:3,4); quat2expmap(rotmat2quat(Tframe(1:3,1:3))); zeros(6,1)];
 end
 
+% step counter
 istep = struct('right', 1, 'left', 1);
 is_first_step = true;
 
@@ -91,8 +94,8 @@ while 1
   st = steps.(st_foot)(istep.(st_foot));
 
   if is_first_step
-    initial_hold = options.first_step_hold_s;
-%     sw1.walking_params.drake_min_hold_time = options.first_step_hold_s;
+    initial_hold = options.first_last_step_hold_s;
+%     sw1.walking_params.drake_min_hold_time = options.first_last_step_hold_s;
     is_first_step = false;
     % sw1.walking_params.step_speed = sw1.walking_params.step_speed / 2;
   else
@@ -127,7 +130,7 @@ end
 % add a segment at the end to recover
 t0 = frame_knots(end).t;
 frame_knots(end+1) = frame_knots(end);
-frame_knots(end).t = t0 + 1.5;
+frame_knots(end).t = t0 + options.first_last_step_hold_s;
 [zmpf, suppf] = getZMPBetweenFeet(biped, struct('right', steps.right(end), 'left', steps.left(end)));
 % zmpf = mean([steps.right(end).pos(1:2), steps.left(end).pos(1:2)], 2);
 zmp_knots(end+1) =  struct('t', frame_knots(end-1).t, 'zmp', zmpf, 'supp', suppf);

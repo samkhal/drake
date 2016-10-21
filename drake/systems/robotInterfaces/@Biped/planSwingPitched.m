@@ -12,7 +12,7 @@ sizecheck(swing2.pos, [7, 1]);
 params = struct(swing2.walking_params);
 params = applyDefaults(params, biped.default_walking_params);
 
-DEBUG = false;
+DEBUG = false; %this flag doesn't work
 DEFAULT_FOOT_PITCH = pi/8; % The amount by which the swing foot pitches forward during walking
 
 APEX_FRACTIONS = [0.15, 0.85]; % We plan only two poses of the foot during the aerial phase of the swing.
