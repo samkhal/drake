@@ -115,6 +115,9 @@ classdef BipedPlanEvalAndControlSystem < DrakeSystem
         end
         y = x;
       end
+    global torques frame
+    torques(:,frame)=y;
+    frame=frame+1;
     end
   end
 end
